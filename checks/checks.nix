@@ -1,23 +1,18 @@
-stuff: mklib:
+pkgs: lib: mklib:
 let
-  lib = mklib stuff;
-  teststuff =
-    {
-      packages =
-        {
-          writeTextFile = stuff.packages.writeTextFile;
-          runCommand = name: args: script: "BUILD " + name;
-          qemu = "QEMU_PATH";
-          OVMFFull.fd = "OVMFFull_FD_PATH";
-        };
-    };
+  teststuff = pkgs // {
+    writeTextFile = pkgs.writeTextFile;
+    runCommand = name: args: script: "BUILD " + name;
+    qemu = "QEMU_PATH";
+    OVMFFull.fd = "OVMFFull_FD_PATH";
+  };
   testlib = mklib teststuff;
   test = xlib: dirpath:
     let
       found = xlib.writeXML (import "${dirpath}/input.nix" testlib);
       expected = "${dirpath}/expected.xml";
     in
-    stuff.packages.runCommand "check" { }
+    pkgs.runCommand "check" { }
       ''
         diff -u ${expected} ${found}
         echo "pass" > $out
@@ -40,13 +35,15 @@ in
 
   volume-typical = test testlib.volume volume/typical;
 
-  virtio-iso = lib.guest-install.virtio-win.iso;
+  # nix flake check tells me this is not a derivation
+  # this error annoys me so much because nothing changed in terms of passing an instance of pkgs
+  #virtio-iso = testlib.guest-install.virtio-win.iso;
 
   ovmf-secboot =
-    stuff.packages.runCommand "ovmf-secboot" { }
+    pkgs.runCommand "ovmf-secboot" { }
       ''
-        test -f ${stuff.packages.OVMFFull.fd}/FV/OVMF_CODE.ms.fd
-        test -f ${stuff.packages.OVMFFull.fd}/FV/OVMF_VARS.ms.fd
+        test -f ${pkgs.OVMFFull.fd}/FV/OVMF_CODE.ms.fd
+        test -f ${pkgs.OVMFFull.fd}/FV/OVMF_VARS.ms.fd
         echo "pass" > $out
       '';
 }

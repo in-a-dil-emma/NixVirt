@@ -1,5 +1,5 @@
-packages:
+pkgs:
 {
   virtio-win.iso =
-    packages.runCommand "virtio-win.iso" { } "${packages.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${packages.virtio-win}";
+    pkgs.runCommand "virtio-win.iso" { } "${pkgs.cdrtools}/bin/mkisofs -l -V VIRTIO-WIN -o $out ${pkgs.virtio-win}";
 }

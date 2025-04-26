@@ -1,16 +1,16 @@
-stuff:
+pkgs:
 let
   objtype = name: getXML:
     {
       inherit getXML;
-      writeXML = obj: stuff.packages.writeTextFile
+      writeXML = obj: pkgs.writeTextFile
         {
           name = "NixVirt-" + name + "-" + obj.name;
           text = getXML obj;
         };
     };
-  guest-install = import ./guest-install.nix stuff.packages;
-  stuff1 = stuff // { inherit guest-install; };
+  guest-install = import ./guest-install.nix pkgs;
+  stuff1 = { inherit guest-install; packages = pkgs; };
 in
 {
   xml = import generate-xml/xml.nix;
